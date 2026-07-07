@@ -141,8 +141,8 @@
     margin: 0 auto;
   }
 
-  .checkin-panel { display: none; }
-  .checkin-panel.active { display: block; }
+  .checkin-panel { display: block; visibility: hidden; height: 0; overflow: hidden; }
+  .checkin-panel.active { visibility: visible; height: auto; overflow: visible; }
 
   /* ── Info Row (ID + Totals) ──────────────────────────────────────────── */
   .info-row {
@@ -355,6 +355,7 @@
 
   .btn-print  { background: var(--sky);    color: white; }
   .btn-clear  { background: var(--yellow); color: var(--navy); }
+  .btn-addrow { background: var(--navy);   color: white; }
   .btn-danger { background: #e74c3c;       color: white; }
   .btn:hover { opacity: 0.88; }
 
@@ -368,9 +369,7 @@
 
     .content { padding: 0; max-width: 100%; }
     .checkin-panel { display: none !important; }
-    .checkin-panel.active { display: block !important; }
-    /* Force Chrome to see active panel */
-    .checkin-panel.active * { visibility: visible !important; }
+    .checkin-panel.active { display: block !important; visibility: visible !important; height: auto !important; overflow: visible !important; }
 
     .info-row { margin-bottom: 8px; }
     .id-block { border: 1.5px solid #29ABE2; padding: 6px 10px; }
@@ -435,7 +434,7 @@
 
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
-const BUFFER_ROWS = 3; // blank rows always kept at bottom
+const DEFAULT_ROWS = 5;
 let tabs = [];
 let activeTab = null;
 let tabCounter = 0;
@@ -588,23 +587,12 @@ function makeRow(tabId, i, r) {
   return tr;
 }
 
-function ensureBufferRows(tabId) {
+function addRow(tabId) {
   const tbody = document.getElementById(`${tabId}_tbody`);
   if (!tbody) return;
-  const total = getRowCount(tabId);
-  // Count trailing empty rows
-  let emptyTail = 0;
-  for (let i = total - 1; i >= 0; i--) {
-    if (rowIsEmpty(tabId, i)) emptyTail++;
-    else break;
-  }
-  // Add rows until we have at least BUFFER_ROWS blank at the end
-  let count = total;
-  while (emptyTail < BUFFER_ROWS) {
-    tbody.appendChild(makeRow(tabId, count));
-    emptyTail++;
-    count++;
-  }
+  const i = getRowCount(tabId);
+  tbody.appendChild(makeRow(tabId, i));
+  save();
 }
 
 // ── Panel Rendering ────────────────────────────────────────────────────────
@@ -642,6 +630,7 @@ function renderPanel(tab) {
   <div class="action-bar">
     <button class="btn btn-print" onclick="printTab('${tab.id}')">🖨 Print</button>
     <button class="btn btn-clear" onclick="clearTab('${tab.id}')">Clear Sheet</button>
+    <button class="btn btn-addrow" onclick="addRow('${tab.id}')">+ Add Row</button>
     <div class="spacer"></div>
     <button class="btn btn-danger" onclick="closeTabConfirm('${tab.id}')">Delete Check-In</button>
   </div>
@@ -685,8 +674,11 @@ function renderPanel(tab) {
     tbody.appendChild(makeRow(tab.id, i, r));
   });
 
-  // Add buffer blank rows
-  ensureBufferRows(tab.id);
+  // Add default rows (top up to DEFAULT_ROWS if saved rows are fewer)
+  const existingRows = (tab.rows || []).length;
+  for (let i = existingRows; i < DEFAULT_ROWS; i++) {
+    tbody.appendChild(makeRow(tab.id, i));
+  }
   updateTotals(tab.id);
   refreshEmptyClasses(tab.id);
 }
@@ -697,7 +689,6 @@ function onAnyInput(tabId, rowIdx) {
   updateM3(tabId, rowIdx);
   updateTotals(tabId);
   refreshEmptyClasses(tabId);
-  ensureBufferRows(tabId);
   save();
 }
 
@@ -804,9 +795,15 @@ function closeTabConfirm(tabId) {
 }
 
 function printTab(tabId) {
-  // Set active tab (already set, but ensure it)
   setActive(tabId);
-  window.print();
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+  if (isStandalone) {
+    // Standalone PWA: window.print() is blocked, open in browser tab instead
+    window.open(window.location.href, '_blank');
+  } else {
+    window.print();
+  }
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
