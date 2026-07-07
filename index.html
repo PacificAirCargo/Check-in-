@@ -802,15 +802,11 @@ function closeTabConfirm(tabId) {
 }
 
 function printTab(tabId) {
+  // Apply class synchronously before print — required for iOS Safari standalone
   document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
   document.getElementById('panel_' + tabId)?.classList.add('printing');
-  setTimeout(() => {
-    window.print();
-    // Clean up after print dialog closes
-    setTimeout(() => {
-      document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
-    }, 500);
-  }, 100);
+  window.print();
+  document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
