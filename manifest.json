@@ -2,7 +2,7 @@
   "name": "PAC Check-In Sheet",
   "short_name": "Check-In",
   "description": "Pacific Air Cargo freight check-in sheet",
-  "start_url": "./checkin.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#1B3172",
   "theme_color": "#1B3172",
