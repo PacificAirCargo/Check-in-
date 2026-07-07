@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Check-In">
+<meta name="theme-color" content="#1B3172">
+<link rel="manifest" href="manifest.json">
+
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEg0lEQVR42u3czVHcQBRFYamLNQkQhTOjWBKAl5QzIwoScAJ4RRlcYOZHavW7/Z0AmNHro6srqYd16cjdj4fXBdPx8vy09vqslcBIEnwlMZLkXomMJLFXIiNJ7EZmjMS1Tq1ERlJaNzIjKa0bmZEkdSMzkqRuZEaS1I3MSJK6kRlJUjcyI0nqZjxIoklnJKV0IzOSpFY5kFs5pDOqp7SERmZCS2ckpLSERhQ3RrANt4/3V/+N3z9/GeSVrOpGf3GJvg8vz0+rhB5Q4O++A8FVjnISn/r9yE3okhKT+8QOPXt/riqyzk3oaInJPaHQM4k8q9iNzI5fQltIaU1oIhNb5SCzOc2b0ESW1o3MSJpfsxhImmPpykFk9SMmoclstjFCk9mMY4Qms1nHCE1mM48RmsxmHyM0ma1BjNBkRozQZEaM0GS2JjFCkxmX4lffG3PJa2MncLDQlRZ3qz0Pn/0dkgcIXWERe23cef855C4o9OiLduQOtLfPJrYOXVpkYp/PEPuhR1ygCnuCe8+twkxuyFxv0ST21/gP/kVlTvjecZVjlGRJEWLPeVaZ0fQJnZRuex1LpRkdJvQI6Zx4qd76mKrNqJHZVSdpRlNWjhluoq49xqoz6i700ek80xOBS4+18oymelM44+OtU/eEpMzmhsxO6CS6Vo6j6gaZ5yH+ppDMhI68GQShpTMITWbEC61uQEJLZxAahA6rG9KZ0AChdWcQGqgsdM/+LJ0hoUFogNDqBggNEBqE3gcbkiChgdmFdkMICQ1CA4QGCA0QGiA0CA0QGiA0QGgQGiA0QOhdsE0VEhqEPhfbOiGhAUIDYUK7MYSEBqGBqYXu+aRD7YCEBqHdHILQQIrQvd8YSmlCA4TWpTGt0DYqQUJLaRCa1ITuhNoBCS2lcSbr3Y+H1xkEc4X4/+xT5jON0LNKfcm8K8+pWVzHmzSn7kIfffbPIvW1x1l1TlO++k6XeqvjqzinQ4QeoaOlSr31cVWb02EJTeo6x1NpTtPvtkuReu/jqDKnQ4Ue5fHQ7eO9FzAh2A8dkNZOxr90f7FSZUEqvFw4Ym6jz2UIoUdOmREX0NvWr7lxkTpNHk9lVI7IBTtC7JHmonIEp9Cei6uChQhd/dJ6yYI7iXXo4Ts3jqFJASStSzM8SGhSg9CkVjcITWrzzxOa1OYeJzSpzTtOaFKbc5zQpDbfOKFJvS+V33YOuZdjpgUQFBJaWptjttCkNr+oyqGCEDkuoaW1OcUmtLSe94SPF5rYc125msV0/BJaWhN5VKGXZVlmlDpZ7lmvRi/PT+v0P5J9W/wEsT3d8avvT2XwbwUITW4Sj9OhZ+/Ro3duAp/WnyX0hnJtITpxVQ41AB9o/0Y2ULVufBAaiEpoKY3q6SyhkZ3QUhqV0/nLhCY1KsqsciC/ckhpVE3nbxOa1Kgk80mVg9SoIvPJHZrUqCDzWTeFpMboMp8lNKkxusxnC01qjCzzsrzb4H8JfhSAUUS+OKGlNUaV+eqEltYYReTNhSY2RrjK71oZyI3eVbVrByY4gffmD8tIMgvAck0WAAAAAElFTkSuQmCC">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAEg0lEQVR42u3czVHcQBRFYamLNQkQhTOjWBKAl5QzIwoScAJ4RRlcYOZHavW7/Z0AmNHro6srqYd16cjdj4fXBdPx8vy09vqslcBIEnwlMZLkXomMJLFXIiNJ7EZmjMS1Tq1ERlJaNzIjKa0bmZEkdSMzkqRuZEaS1I3MSJK6kRlJUjcyI0nqZjxIoklnJKV0IzOSpFY5kFs5pDOqp7SERmZCS2ckpLSERhQ3RrANt4/3V/+N3z9/GeSVrOpGf3GJvg8vz0+rhB5Q4O++A8FVjnISn/r9yE3okhKT+8QOPXt/riqyzk3oaInJPaHQM4k8q9iNzI5fQltIaU1oIhNb5SCzOc2b0ESW1o3MSJpfsxhImmPpykFk9SMmoclstjFCk9mMY4Qms1nHCE1mM48RmsxmHyM0ma1BjNBkRozQZEaM0GS2JjFCkxmX4lffG3PJa2MncLDQlRZ3qz0Pn/0dkgcIXWERe23cef855C4o9OiLduQOtLfPJrYOXVpkYp/PEPuhR1ygCnuCe8+twkxuyFxv0ST21/gP/kVlTvjecZVjlGRJEWLPeVaZ0fQJnZRuex1LpRkdJvQI6Zx4qd76mKrNqJHZVSdpRlNWjhluoq49xqoz6i700ek80xOBS4+18oymelM44+OtU/eEpMzmhsxO6CS6Vo6j6gaZ5yH+ppDMhI68GQShpTMITWbEC61uQEJLZxAahA6rG9KZ0AChdWcQGqgsdM/+LJ0hoUFogNDqBggNEBqE3gcbkiChgdmFdkMICQ1CA4QGCA0QGiA0CA0QGiA0QGgQGiA0QOhdsE0VEhqEPhfbOiGhAUIDYUK7MYSEBqGBqYXu+aRD7YCEBqHdHILQQIrQvd8YSmlCA4TWpTGt0DYqQUJLaRCa1ITuhNoBCS2lcSbr3Y+H1xkEc4X4/+xT5jON0LNKfcm8K8+pWVzHmzSn7kIfffbPIvW1x1l1TlO++k6XeqvjqzinQ4QeoaOlSr31cVWb02EJTeo6x1NpTtPvtkuReu/jqDKnQ4Ue5fHQ7eO9FzAh2A8dkNZOxr90f7FSZUEqvFw4Ym6jz2UIoUdOmREX0NvWr7lxkTpNHk9lVI7IBTtC7JHmonIEp9Cei6uChQhd/dJ6yYI7iXXo4Ts3jqFJASStSzM8SGhSg9CkVjcITWrzzxOa1OYeJzSpzTtOaFKbc5zQpDbfOKFJvS+V33YOuZdjpgUQFBJaWptjttCkNr+oyqGCEDkuoaW1OcUmtLSe94SPF5rYc125msV0/BJaWhN5VKGXZVlmlDpZ7lmvRi/PT+v0P5J9W/wEsT3d8avvT2XwbwUITW4Sj9OhZ+/Ro3duAp/WnyX0hnJtITpxVQ41AB9o/0Y2ULVufBAaiEpoKY3q6SyhkZ3QUhqV0/nLhCY1KsqsciC/ckhpVE3nbxOa1Kgk80mVg9SoIvPJHZrUqCDzWTeFpMboMp8lNKkxusxnC01qjCzzsrzb4H8JfhSAUUS+OKGlNUaV+eqEltYYReTNhSY2RrjK71oZyI3eVbVrByY4gffmD8tIMgvAck0WAAAAAElFTkSuQmCC">
+<title>PAC Check-In Sheet</title>
+<style>
+  /* ── Reset & Base ─────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:   #1B3172;
+    --sky:    #29ABE2;
+    --yellow: #F5C518;
+    --white:  #FFFFFF;
+    --light:  #EEF6FB;
+    --mid:    #BDD7EE;
+    --locked: #f0f4f8;
+    --border: #b0c4d8;
+    --danger: #e74c3c;
+    --text:   #1a2a3a;
+    --radius: 4px;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #e8edf2;
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────────────── */
+  .app-header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .app-header h1 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .app-header .subtitle {
+    font-size: 10px;
+    opacity: 0.65;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .header-logo {
+    width: 36px;
+    height: 36px;
+    background: var(--sky);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 14px; color: white;
+    flex-shrink: 0;
+  }
+
+  /* ── Tab Bar ─────────────────────────────────────────────────────────── */
+  .tab-bar {
+    background: var(--navy);
+    padding: 0 12px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    overflow-x: auto;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .tab-bar::-webkit-scrollbar { height: 3px; }
+  .tab-bar::-webkit-scrollbar-thumb { background: var(--sky); border-radius: 2px; }
+
+  .tab {
+    padding: 7px 14px 7px;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.65);
+    border: none;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+    display: flex; align-items: center; gap: 6px;
+    font-family: Arial, sans-serif;
+  }
+  .tab:hover { background: rgba(255,255,255,0.18); color: white; }
+  .tab.active {
+    background: #e8edf2;
+    color: var(--navy);
+  }
+  .tab .close-tab {
+    width: 14px; height: 14px;
+    background: rgba(0,0,0,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .tab.active .close-tab { background: rgba(27,49,114,0.2); color: var(--navy); }
+  .tab .close-tab:hover { background: var(--danger) !important; color: white; }
+
+  .add-tab-btn {
+    padding: 6px 10px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.15s, background 0.15s;
+    font-family: Arial, sans-serif;
+    align-self: center;
+    margin-bottom: 2px;
+  }
+  .add-tab-btn:hover { color: white; background: rgba(255,255,255,0.1); }
+
+  /* ── Main Content ────────────────────────────────────────────────────── */
+  .content {
+    padding: 16px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .checkin-panel { display: none; }
+  .checkin-panel.active { display: block; }
+
+  /* ── Info Row (ID + Totals) ──────────────────────────────────────────── */
+  .info-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  .id-block {
+    background: var(--white);
+    border: 2px solid var(--sky);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 220px;
+  }
+  .id-block label {
+    font-weight: 700;
+    color: var(--navy);
+    white-space: nowrap;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .id-block input {
+    border: none;
+    border-bottom: 2px solid var(--sky);
+    outline: none;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    width: 100%;
+    padding: 2px 4px;
+    background: transparent;
+    font-family: Arial, sans-serif;
+  }
+
+  .totals-block {
+    background: var(--navy);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .total-item { text-align: center; }
+  .total-item .t-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .total-item .t-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--yellow);
+    line-height: 1.1;
+    min-width: 48px;
+    display: block;
+  }
+  .total-divider {
+    width: 1px;
+    height: 30px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* ── Table ───────────────────────────────────────────────────────────── */
+  .table-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  /* Header */
+  thead tr th {
+    background: var(--sky);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 9px 6px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.2);
+    white-space: nowrap;
+  }
+  thead tr th:last-child { border-right: none; }
+
+  /* Sub-header group labels */
+  .col-group {
+    background: var(--navy) !important;
+    font-size: 9px !important;
+    letter-spacing: 1px !important;
+    padding: 4px 6px !important;
+    border-right: 1px solid rgba(255,255,255,0.15) !important;
+    color: rgba(255,255,255,0.7) !important;
+  }
+
+  /* Body rows */
+  tbody tr { border-bottom: 1px solid #e0e8f0; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover td { background: #f5fafd; }
+  tbody tr:nth-child(even) td { background: #fafcfe; }
+  tbody tr:nth-child(even):hover td { background: #f0f7fc; }
+
+  td {
+    padding: 4px 4px;
+    text-align: center;
+    border-right: 1px solid #e0e8f0;
+    position: relative;
+  }
+  td:last-child { border-right: none; }
+
+  /* Row number */
+  td.row-num {
+    background: var(--locked) !important;
+    color: #8aa0b8;
+    font-size: 10px;
+    width: 28px;
+    min-width: 28px;
+    font-weight: 600;
+  }
+
+  /* Editable cells */
+  td input {
+    width: 100%;
+    border: none;
+    outline: none;
+    text-align: center;
+    font-size: 13px;
+    background: transparent;
+    color: var(--text);
+    padding: 3px 2px;
+    font-family: Arial, sans-serif;
+  }
+  td input:focus {
+    background: #fffbea;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 2px var(--sky);
+  }
+
+  /* Locked/calculated cells */
+  td.locked {
+    background: var(--locked) !important;
+    color: var(--navy);
+    font-weight: 600;
+    font-size: 12px;
+  }
+  td.locked-empty {
+    background: var(--locked) !important;
+    color: #c0ced8;
+    font-size: 11px;
+  }
+
+  /* DG / Lithium tick cells */
+  td input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--sky);
+  }
+
+  /* Column widths */
+  .col-row  { width: 28px; }
+  .col-pcs  { width: 52px; }
+  .col-wt   { width: 64px; }
+  .col-dim  { width: 58px; }
+  .col-no   { width: 46px; }
+  .col-m3   { width: 68px; }
+  .col-lith { width: 54px; }
+  .col-dg   { width: 54px; }
+
+  /* ── Action Bar ──────────────────────────────────────────────────────── */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    transition: opacity 0.15s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-print  { background: var(--sky);    color: white; }
+  .btn-clear  { background: var(--yellow); color: var(--navy); }
+  .btn-danger { background: #e74c3c;       color: white; }
+  .btn:hover { opacity: 0.88; }
+
+  .spacer { flex: 1; }
+
+  /* ── Print Styles ────────────────────────────────────────────────────── */
+  @media print {
+    body { background: white; font-size: 11px; }
+
+    .app-header, .tab-bar, .action-bar { display: none !important; }
+
+    .content { padding: 0; max-width: 100%; }
+    .checkin-panel { display: none !important; }
+    .checkin-panel.printing { display: block !important; }
+
+    .info-row { margin-bottom: 8px; }
+    .id-block { border: 1.5px solid #29ABE2; padding: 6px 10px; }
+    .totals-block { background: #1B3172 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 6px 12px; }
+    .total-item .t-value { font-size: 15px; }
+
+    .table-wrap { box-shadow: none; border: 1px solid #b0c4d8; }
+
+    thead tr th {
+      background: #29ABE2 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .col-group {
+      background: #1B3172 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Hide empty rows on print */
+    tbody tr.empty-row { display: none !important; }
+
+    td.locked, td.row-num, td.locked-empty {
+      background: #f0f4f8 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    @page {
+      size: A4 landscape;
+      margin: 10mm;
+    }
+  }
+
+  /* ── Responsive ──────────────────────────────────────────────────────── */
+  @media (max-width: 700px) {
+    .content { padding: 10px 8px; }
+    .totals-block { gap: 12px; }
+    .total-item .t-value { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <div class="app-header h1" style="font-size:16px;font-weight:700;letter-spacing:.5px;color:white;">PAC Check-In Sheet</div>
+    <div class="subtitle">Pacific Air Cargo — Freight Check-In</div>
+  </div>
+  <div class="header-logo">PAC</div>
+</div>
+
+<div class="tab-bar" id="tabBar">
+  <!-- tabs injected by JS -->
+  <button class="add-tab-btn" onclick="addTab()" title="New check-in">+</button>
+</div>
+
+<div class="content" id="panelContainer">
+  <!-- panels injected by JS -->
+</div>
+
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const BUFFER_ROWS = 3; // blank rows always kept at bottom
+let tabs = [];
+let activeTab = null;
+let tabCounter = 0;
+
+// ── Storage ────────────────────────────────────────────────────────────────
+function save() {
+  try {
+    // Save only rows that have data
+    const slim = tabs.map(t => ({
+      ...t,
+      rows: t.rows.filter(r => r.pcs||r.weight||r.length||r.width||r.height||r.no||r.lithium||r.dg)
+    }));
+    localStorage.setItem('pac_checkin_tabs', JSON.stringify(slim));
+  } catch(e){}
+}
+function load() {
+  try {
+    const d = localStorage.getItem('pac_checkin_tabs');
+    if (d) return JSON.parse(d);
+  } catch(e){}
+  return null;
+}
+
+// ── Tab Management ─────────────────────────────────────────────────────────
+function addTab(label, data) {
+  tabCounter++;
+  const id = 'tab_' + tabCounter;
+  const tab = {
+    id,
+    label: label || 'Check-In ' + tabCounter,
+    idNumber: data?.idNumber || '',
+    rows: data?.rows || []
+  };
+  tabs.push(tab);
+  renderTabBar();
+  renderPanel(tab);
+  setActive(id);
+  save();
+  return tab;
+}
+
+function closeTab(id, e) {
+  e.stopPropagation();
+  if (tabs.length === 1) { clearTab(id); return; }
+  const idx = tabs.findIndex(t => t.id === id);
+  tabs = tabs.filter(t => t.id !== id);
+  document.getElementById('panel_' + id)?.remove();
+  renderTabBar();
+  const next = tabs[Math.min(idx, tabs.length - 1)];
+  setActive(next.id);
+  save();
+}
+
+function setActive(id) {
+  activeTab = id;
+  document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel_' + id)?.classList.add('active');
+  renderTabBar();
+}
+
+function renameTab(id) {
+  const tab = tabs.find(t => t.id === id);
+  if (!tab) return;
+  const name = prompt('Rename check-in:', tab.label);
+  if (name && name.trim()) {
+    tab.label = name.trim();
+    renderTabBar();
+    save();
+  }
+}
+
+function renderTabBar() {
+  const bar = document.getElementById('tabBar');
+  const addBtn = bar.querySelector('.add-tab-btn');
+  bar.querySelectorAll('.tab').forEach(t => t.remove());
+  tabs.forEach(tab => {
+    const el = document.createElement('button');
+    el.className = 'tab' + (tab.id === activeTab ? ' active' : '');
+    el.innerHTML = `<span ondblclick="renameTab('${tab.id}')" title="Double-tap to rename">${escHtml(tab.label)}</span>
+      <span class="close-tab" onclick="closeTab('${tab.id}', event)">✕</span>`;
+    el.onclick = () => setActive(tab.id);
+    bar.insertBefore(el, addBtn);
+  });
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function rowIsEmpty(tabId, idx) {
+  const fields = ['pcs','weight','length','width','height','no','dg'];
+  for (const f of fields) {
+    if (document.getElementById(`${tabId}_${f}_${idx}`)?.value?.trim()) return false;
+  }
+  if (document.getElementById(`${tabId}_lith_${idx}`)?.checked) return false;
+  return true;
+}
+
+function getRowCount(tabId) {
+  // Count how many rows exist in the DOM for this tab
+  let i = 0;
+  while (document.getElementById(`${tabId}_row_${i}`)) i++;
+  return i;
+}
+
+// ── Row Creation ───────────────────────────────────────────────────────────
+function makeRow(tabId, i, r) {
+  r = r || {pcs:'',weight:'',length:'',width:'',height:'',no:'',lithium:false,dg:''};
+  const tr = document.createElement('tr');
+  tr.id = `${tabId}_row_${i}`;
+  tr.className = 'empty-row';
+  tr.innerHTML = `
+    <td class="row-num col-row">${i+1}</td>
+    <td class="col-pcs"><input type="text" inputmode="numeric" pattern="[0-9]*"
+        id="${tabId}_pcs_${i}" value="${escHtml(r.pcs)}"></td>
+    <td class="col-wt"><input type="text" inputmode="decimal" pattern="[0-9.]*"
+        id="${tabId}_weight_${i}" value="${escHtml(r.weight)}"></td>
+    <td class="col-dim"><input type="text" inputmode="numeric" pattern="[0-9]*"
+        id="${tabId}_length_${i}" value="${escHtml(r.length)}"></td>
+    <td class="col-dim"><input type="text" inputmode="numeric" pattern="[0-9]*"
+        id="${tabId}_width_${i}" value="${escHtml(r.width)}"></td>
+    <td class="col-dim"><input type="text" inputmode="numeric" pattern="[0-9]*"
+        id="${tabId}_height_${i}" value="${escHtml(r.height)}"></td>
+    <td class="col-no"><input type="text" inputmode="numeric" pattern="[0-9]*"
+        id="${tabId}_no_${i}" value="${escHtml(r.no)}"></td>
+    <td class="locked col-m3" id="${tabId}_m3_${i}">${calcM3Display(r)}</td>
+    <td class="col-lith" style="text-align:center;">
+      <input type="checkbox" id="${tabId}_lith_${i}" ${r.lithium ? 'checked' : ''}>
+    </td>
+    <td class="col-dg"><input type="text" id="${tabId}_dg_${i}" value="${escHtml(r.dg)}"></td>`;
+
+  // Wire up events
+  const wire = (field, handler) => {
+    const el = tr.querySelector(`#${tabId}_${field}_${i}`);
+    if (!el) return;
+    el.addEventListener('input',  () => handler());
+    el.addEventListener('change', () => handler());
+  };
+
+  wire('pcs',    () => onAnyInput(tabId, i));
+  wire('weight', () => onAnyInput(tabId, i));
+  wire('length', () => { updateM3(tabId, i); onAnyInput(tabId, i); });
+  wire('width',  () => { updateM3(tabId, i); onAnyInput(tabId, i); });
+  wire('height', () => { updateM3(tabId, i); onAnyInput(tabId, i); });
+  wire('no',     () => onAnyInput(tabId, i));
+  wire('dg',     () => onAnyInput(tabId, i));
+  tr.querySelector(`#${tabId}_lith_${i}`)?.addEventListener('change', () => onAnyInput(tabId, i));
+
+  return tr;
+}
+
+function ensureBufferRows(tabId) {
+  const tbody = document.getElementById(`${tabId}_tbody`);
+  if (!tbody) return;
+  const total = getRowCount(tabId);
+  // Count trailing empty rows
+  let emptyTail = 0;
+  for (let i = total - 1; i >= 0; i--) {
+    if (rowIsEmpty(tabId, i)) emptyTail++;
+    else break;
+  }
+  // Add rows until we have at least BUFFER_ROWS blank at the end
+  let count = total;
+  while (emptyTail < BUFFER_ROWS) {
+    tbody.appendChild(makeRow(tabId, count));
+    emptyTail++;
+    count++;
+  }
+}
+
+// ── Panel Rendering ────────────────────────────────────────────────────────
+function renderPanel(tab) {
+  const container = document.getElementById('panelContainer');
+  const div = document.createElement('div');
+  div.className = 'checkin-panel';
+  div.id = 'panel_' + tab.id;
+
+  div.innerHTML = `
+  <div class="info-row">
+    <div class="id-block">
+      <label>ID Number</label>
+      <input type="text" id="${tab.id}_idnum" value="${escHtml(tab.idNumber)}"
+        placeholder="Enter ID…">
+    </div>
+    <div class="totals-block">
+      <div class="total-item">
+        <span class="t-label">PCS</span>
+        <span class="t-value" id="${tab.id}_tot_pcs">0</span>
+      </div>
+      <div class="total-divider"></div>
+      <div class="total-item">
+        <span class="t-label">KG</span>
+        <span class="t-value" id="${tab.id}_tot_kg">0.00</span>
+      </div>
+      <div class="total-divider"></div>
+      <div class="total-item">
+        <span class="t-label">M³</span>
+        <span class="t-value" id="${tab.id}_tot_m3">0.000</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn btn-print" onclick="printTab('${tab.id}')">🖨 Print</button>
+    <button class="btn btn-clear" onclick="clearTab('${tab.id}')">Clear Sheet</button>
+    <div class="spacer"></div>
+    <button class="btn btn-danger" onclick="closeTabConfirm('${tab.id}')">Delete Check-In</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-group" rowspan="2">#</th>
+          <th class="col-group" colspan="2">CARGO</th>
+          <th class="col-group" colspan="3">DIMENSIONS (cm)</th>
+          <th class="col-group" rowspan="2">NO.</th>
+          <th class="col-group" rowspan="2">M³</th>
+          <th class="col-group" colspan="2">DANGEROUS GOODS</th>
+        </tr>
+        <tr>
+          <th class="col-pcs">PCS</th>
+          <th class="col-wt">WEIGHT (kg)</th>
+          <th class="col-dim">L</th>
+          <th class="col-dim">W</th>
+          <th class="col-dim">H</th>
+          <th class="col-lith">LITHIUM</th>
+          <th class="col-dg">DG CLASS</th>
+        </tr>
+      </thead>
+      <tbody id="${tab.id}_tbody"></tbody>
+    </table>
+  </div>`;
+
+  container.appendChild(div);
+
+  // Wire ID number input
+  div.querySelector(`#${tab.id}_idnum`).addEventListener('input', function() {
+    const t = tabs.find(x => x.id === tab.id);
+    if (t) { t.idNumber = this.value; save(); }
+  });
+
+  // Render saved rows
+  const tbody = div.querySelector(`#${tab.id}_tbody`);
+  (tab.rows || []).forEach((r, i) => {
+    tbody.appendChild(makeRow(tab.id, i, r));
+  });
+
+  // Add buffer blank rows
+  ensureBufferRows(tab.id);
+  updateTotals(tab.id);
+  refreshEmptyClasses(tab.id);
+}
+
+// ── Cell Logic ─────────────────────────────────────────────────────────────
+function onAnyInput(tabId, rowIdx) {
+  syncRowToTab(tabId, rowIdx);
+  updateM3(tabId, rowIdx);
+  updateTotals(tabId);
+  refreshEmptyClasses(tabId);
+  ensureBufferRows(tabId);
+  save();
+}
+
+function syncRowToTab(tabId, rowIdx) {
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+  while (tab.rows.length <= rowIdx) tab.rows.push({pcs:'',weight:'',length:'',width:'',height:'',no:'',lithium:false,dg:''});
+  const r = tab.rows[rowIdx];
+  ['pcs','weight','length','width','height','no','dg'].forEach(f => {
+    r[f] = document.getElementById(`${tabId}_${f}_${rowIdx}`)?.value || '';
+  });
+  r.lithium = document.getElementById(`${tabId}_lith_${rowIdx}`)?.checked || false;
+}
+
+function calcM3(r) {
+  const l = parseFloat(r.length), w = parseFloat(r.width), h = parseFloat(r.height);
+  if (l > 0 && w > 0 && h > 0) return (l * w * h) / 1000000;
+  return null;
+}
+
+function calcM3Display(r) {
+  const v = calcM3(r);
+  return v !== null ? v.toFixed(4) : '<span style="color:#c0ced8">—</span>';
+}
+
+function updateM3(tabId, rowIdx) {
+  const r = {
+    length: document.getElementById(`${tabId}_length_${rowIdx}`)?.value || '',
+    width:  document.getElementById(`${tabId}_width_${rowIdx}`)?.value  || '',
+    height: document.getElementById(`${tabId}_height_${rowIdx}`)?.value || ''
+  };
+  const cell = document.getElementById(`${tabId}_m3_${rowIdx}`);
+  if (cell) cell.innerHTML = calcM3Display(r);
+}
+
+function updateTotals(tabId) {
+  let totPcs = 0, totKg = 0, totM3 = 0;
+  const total = getRowCount(tabId);
+  for (let i = 0; i < total; i++) {
+    totPcs += parseFloat(document.getElementById(`${tabId}_pcs_${i}`)?.value)    || 0;
+    totKg  += parseFloat(document.getElementById(`${tabId}_weight_${i}`)?.value) || 0;
+    const l = parseFloat(document.getElementById(`${tabId}_length_${i}`)?.value) || 0;
+    const w = parseFloat(document.getElementById(`${tabId}_width_${i}`)?.value)  || 0;
+    const h = parseFloat(document.getElementById(`${tabId}_height_${i}`)?.value) || 0;
+    if (l > 0 && w > 0 && h > 0) totM3 += (l * w * h) / 1000000;
+  }
+  document.getElementById(`${tabId}_tot_pcs`).textContent = totPcs;
+  document.getElementById(`${tabId}_tot_kg`).textContent  = totKg.toFixed(2);
+  document.getElementById(`${tabId}_tot_m3`).textContent  = totM3.toFixed(3);
+}
+
+function refreshEmptyClasses(tabId) {
+  const total = getRowCount(tabId);
+  for (let i = 0; i < total; i++) {
+    const row = document.getElementById(`${tabId}_row_${i}`);
+    if (row) row.classList.toggle('empty-row', rowIsEmpty(tabId, i));
+  }
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+function clearTab(tabId) {
+  if (!confirm('Clear all data on this check-in sheet?')) return;
+  const tab = tabs.find(t => t.id === tabId);
+  if (!tab) return;
+  tab.idNumber = '';
+  tab.rows = [];
+  document.getElementById('panel_' + tabId)?.remove();
+  renderPanel(tab);
+  setActive(tabId);
+  save();
+}
+
+function closeTabConfirm(tabId) {
+  if (tabs.length === 1) { clearTab(tabId); return; }
+  if (!confirm('Delete this check-in tab? This cannot be undone.')) return;
+  const idx = tabs.findIndex(t => t.id === tabId);
+  tabs = tabs.filter(t => t.id !== tabId);
+  document.getElementById('panel_' + tabId)?.remove();
+  renderTabBar();
+  const next = tabs[Math.min(idx, tabs.length - 1)];
+  setActive(next.id);
+  save();
+}
+
+function printTab(tabId) {
+  document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
+  document.getElementById('panel_' + tabId)?.classList.add('printing');
+  window.print();
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+(function init() {
+  const saved = load();
+  if (saved && saved.length > 0) {
+    saved.forEach(tab => {
+      tabCounter++;
+      tabs.push(tab);
+      renderTabBar();
+      renderPanel(tab);
+    });
+    setActive(tabs[0].id);
+  } else {
+    addTab('Check-In 1');
+  }
+})();
+</script>
+</body>
+</html>
