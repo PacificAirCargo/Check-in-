@@ -368,7 +368,9 @@
 
     .content { padding: 0; max-width: 100%; }
     .checkin-panel { display: none !important; }
-    .checkin-panel.printing { display: block !important; }
+    .checkin-panel.active { display: block !important; }
+    /* Force Chrome to see active panel */
+    .checkin-panel.active * { visibility: visible !important; }
 
     .info-row { margin-bottom: 8px; }
     .id-block { border: 1.5px solid #29ABE2; padding: 6px 10px; }
@@ -802,14 +804,9 @@ function closeTabConfirm(tabId) {
 }
 
 function printTab(tabId) {
-  document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
-  document.getElementById('panel_' + tabId)?.classList.add('printing');
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      window.print();
-      document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
-    });
-  });
+  // Set active tab (already set, but ensure it)
+  setActive(tabId);
+  window.print();
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
