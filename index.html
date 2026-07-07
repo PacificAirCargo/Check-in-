@@ -576,7 +576,7 @@ function makeRow(tabId, i, r) {
   wire('length', () => { updateM3(tabId, i); onAnyInput(tabId, i); });
   wire('width',  () => { updateM3(tabId, i); onAnyInput(tabId, i); });
   wire('height', () => { updateM3(tabId, i); onAnyInput(tabId, i); });
-  wire('no',     () => onAnyInput(tabId, i));
+  wire('no',     () => { updateM3(tabId, i); onAnyInput(tabId, i); });
   wire('dg',     () => onAnyInput(tabId, i));
   tr.querySelector(`#${tabId}_lith_${i}`)?.addEventListener('change', () => onAnyInput(tabId, i));
 
@@ -709,8 +709,9 @@ function syncRowToTab(tabId, rowIdx) {
 
 function calcM3(r) {
   const l = parseFloat(r.length), w = parseFloat(r.width), h = parseFloat(r.height);
+  const no = parseFloat(r.no) || 1;
   if (l > 0 && w > 0 && h > 0) {
-    const raw = (l * w * h) / 1000000;
+    const raw = (l * w * h) / 1000000 * no;
     return Math.ceil(raw * 100) / 100;
   }
   return null;
@@ -725,7 +726,8 @@ function updateM3(tabId, rowIdx) {
   const r = {
     length: document.getElementById(`${tabId}_length_${rowIdx}`)?.value || '',
     width:  document.getElementById(`${tabId}_width_${rowIdx}`)?.value  || '',
-    height: document.getElementById(`${tabId}_height_${rowIdx}`)?.value || ''
+    height: document.getElementById(`${tabId}_height_${rowIdx}`)?.value || '',
+    no:     document.getElementById(`${tabId}_no_${rowIdx}`)?.value     || ''
   };
   const cell = document.getElementById(`${tabId}_m3_${rowIdx}`);
   if (cell) cell.innerHTML = calcM3Display(r);
@@ -737,11 +739,12 @@ function updateTotals(tabId) {
   for (let i = 0; i < total; i++) {
     totPcs += parseFloat(document.getElementById(`${tabId}_pcs_${i}`)?.value)    || 0;
     totKg  += parseFloat(document.getElementById(`${tabId}_weight_${i}`)?.value) || 0;
-    const l = parseFloat(document.getElementById(`${tabId}_length_${i}`)?.value) || 0;
-    const w = parseFloat(document.getElementById(`${tabId}_width_${i}`)?.value)  || 0;
-    const h = parseFloat(document.getElementById(`${tabId}_height_${i}`)?.value) || 0;
+    const l  = parseFloat(document.getElementById(`${tabId}_length_${i}`)?.value) || 0;
+    const w  = parseFloat(document.getElementById(`${tabId}_width_${i}`)?.value)  || 0;
+    const h  = parseFloat(document.getElementById(`${tabId}_height_${i}`)?.value) || 0;
+    const no = parseFloat(document.getElementById(`${tabId}_no_${i}`)?.value)     || 1;
     if (l > 0 && w > 0 && h > 0) {
-      totM3 += Math.ceil((l * w * h) / 1000000 * 100) / 100;
+      totM3 += Math.ceil((l * w * h) / 1000000 * no * 100) / 100;
     }
   }
   document.getElementById(`${tabId}_tot_pcs`).textContent = totPcs;
