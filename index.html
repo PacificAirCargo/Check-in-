@@ -804,7 +804,13 @@ function closeTabConfirm(tabId) {
 function printTab(tabId) {
   document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
   document.getElementById('panel_' + tabId)?.classList.add('printing');
-  window.print();
+  setTimeout(() => {
+    window.print();
+    // Clean up after print dialog closes
+    setTimeout(() => {
+      document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
+    }, 500);
+  }, 100);
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
