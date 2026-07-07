@@ -795,15 +795,7 @@ function closeTabConfirm(tabId) {
 }
 
 function printTab(tabId) {
-  setActive(tabId);
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true;
-  if (isStandalone) {
-    // Standalone PWA: window.print() is blocked, open in browser tab instead
-    window.open(window.location.href, '_blank');
-  } else {
-    window.print();
-  }
+  window.print();
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
