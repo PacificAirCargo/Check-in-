@@ -3,7 +3,7 @@
   "short_name": "Check-In",
   "description": "Pacific Air Cargo freight check-in sheet",
   "start_url": "./index.html",
-  "display": "standalone",
+  "display": "browser",
   "background_color": "#1B3172",
   "theme_color": "#1B3172",
   "orientation": "landscape",
