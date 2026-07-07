@@ -709,13 +709,16 @@ function syncRowToTab(tabId, rowIdx) {
 
 function calcM3(r) {
   const l = parseFloat(r.length), w = parseFloat(r.width), h = parseFloat(r.height);
-  if (l > 0 && w > 0 && h > 0) return (l * w * h) / 1000000;
+  if (l > 0 && w > 0 && h > 0) {
+    const raw = (l * w * h) / 1000000;
+    return Math.ceil(raw * 100) / 100;
+  }
   return null;
 }
 
 function calcM3Display(r) {
   const v = calcM3(r);
-  return v !== null ? v.toFixed(4) : '<span style="color:#c0ced8">—</span>';
+  return v !== null ? v.toFixed(2) : '<span style="color:#c0ced8">—</span>';
 }
 
 function updateM3(tabId, rowIdx) {
@@ -737,11 +740,13 @@ function updateTotals(tabId) {
     const l = parseFloat(document.getElementById(`${tabId}_length_${i}`)?.value) || 0;
     const w = parseFloat(document.getElementById(`${tabId}_width_${i}`)?.value)  || 0;
     const h = parseFloat(document.getElementById(`${tabId}_height_${i}`)?.value) || 0;
-    if (l > 0 && w > 0 && h > 0) totM3 += (l * w * h) / 1000000;
+    if (l > 0 && w > 0 && h > 0) {
+      totM3 += Math.ceil((l * w * h) / 1000000 * 100) / 100;
+    }
   }
   document.getElementById(`${tabId}_tot_pcs`).textContent = totPcs;
-  document.getElementById(`${tabId}_tot_kg`).textContent  = totKg.toFixed(2);
-  document.getElementById(`${tabId}_tot_m3`).textContent  = totM3.toFixed(3);
+  document.getElementById(`${tabId}_tot_kg`).textContent  = Math.ceil(totKg);
+  document.getElementById(`${tabId}_tot_m3`).textContent  = totM3.toFixed(2);
 }
 
 function refreshEmptyClasses(tabId) {
