@@ -802,11 +802,14 @@ function closeTabConfirm(tabId) {
 }
 
 function printTab(tabId) {
-  // Apply class synchronously before print — required for iOS Safari standalone
   document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
   document.getElementById('panel_' + tabId)?.classList.add('printing');
-  window.print();
-  document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.print();
+      document.querySelectorAll('.checkin-panel').forEach(p => p.classList.remove('printing'));
+    });
+  });
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
