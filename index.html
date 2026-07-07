@@ -261,6 +261,9 @@
   tbody tr:nth-child(even) td { background: #fafcfe; }
   tbody tr:nth-child(even):hover td { background: #f0f7fc; }
 
+  /* PCS / NO. mismatch warning — only highlight the two cells */
+  tbody tr.mismatch-warning td.warn-cell { background: #F5C518 !important; color: #1B3172 !important; font-weight: 700; }
+
   td {
     padding: 4px 4px;
     text-align: center;
@@ -545,7 +548,7 @@ function makeRow(tabId, i, r) {
   tr.className = 'empty-row';
   tr.innerHTML = `
     <td class="row-num col-row">${i+1}</td>
-    <td class="col-pcs"><input type="text" inputmode="numeric" pattern="[0-9]*"
+    <td class="col-pcs warn-cell"><input type="text" inputmode="numeric" pattern="[0-9]*"
         id="${tabId}_pcs_${i}" value="${escHtml(r.pcs)}"></td>
     <td class="col-wt"><input type="text" inputmode="decimal" pattern="[0-9.]*"
         id="${tabId}_weight_${i}" value="${escHtml(r.weight)}"></td>
@@ -555,7 +558,7 @@ function makeRow(tabId, i, r) {
         id="${tabId}_width_${i}" value="${escHtml(r.width)}"></td>
     <td class="col-dim"><input type="text" inputmode="numeric" pattern="[0-9]*"
         id="${tabId}_height_${i}" value="${escHtml(r.height)}"></td>
-    <td class="col-no"><input type="text" inputmode="numeric" pattern="[0-9]*"
+    <td class="col-no warn-cell"><input type="text" inputmode="numeric" pattern="[0-9]*"
         id="${tabId}_no_${i}" value="${escHtml(r.no)}"></td>
     <td class="locked col-m3" id="${tabId}_m3_${i}">${calcM3Display(r)}</td>
     <td class="col-lith" style="text-align:center;">
@@ -754,9 +757,22 @@ function updateTotals(tabId) {
 
 function refreshEmptyClasses(tabId) {
   const total = getRowCount(tabId);
+
+  // PCS is entered once in row 0 — compare against sum of all NO. values
+  const totalPcs = parseFloat(document.getElementById(`${tabId}_pcs_0`)?.value) || 0;
+  let totalNo = 0;
+  for (let i = 0; i < total; i++) {
+    totalNo += parseFloat(document.getElementById(`${tabId}_no_${i}`)?.value) || 0;
+  }
+  const mismatch = totalPcs > 0 && totalNo > 0 && totalPcs !== totalNo;
+
   for (let i = 0; i < total; i++) {
     const row = document.getElementById(`${tabId}_row_${i}`);
-    if (row) row.classList.toggle('empty-row', rowIsEmpty(tabId, i));
+    if (!row) continue;
+    const empty = rowIsEmpty(tabId, i);
+    row.classList.toggle('empty-row', empty);
+    // Highlight PCS cell on row 0 and any NO. cell when totals don't match
+    row.classList.toggle('mismatch-warning', !empty && mismatch);
   }
 }
 
