@@ -135,8 +135,8 @@
     margin: 0 auto;
   }
 
-  .checkin-panel { display: none; }
-  .checkin-panel.active { display: block; }
+  .checkin-panel { display: block; visibility: hidden; height: 0; overflow: hidden; }
+  .checkin-panel.active { visibility: visible; height: auto; overflow: visible; }
 
   /* ── Info Row (ID + Totals) ──────────────────────────────────────────── */
   .info-row {
@@ -363,7 +363,7 @@
 
     .content { padding: 0; max-width: 100%; }
     .checkin-panel { display: none !important; }
-    .checkin-panel.active { display: block !important; }
+    .checkin-panel.active { display: block !important; visibility: visible !important; height: auto !important; overflow: visible !important; }
 
     .info-row { margin-bottom: 8px; }
     .id-block { border: 1.5px solid #29ABE2; padding: 6px 10px; }
@@ -789,17 +789,7 @@ function closeTabConfirm(tabId) {
 }
 
 function printTab(tabId) {
-  if (navigator.share) {
-    navigator.share({
-      title: document.title,
-      url: window.location.href
-    }).catch(() => {
-      // User cancelled or share failed, fall back to print
-      window.print();
-    });
-  } else {
-    window.print();
-  }
+  window.print();
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
