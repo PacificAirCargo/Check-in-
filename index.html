@@ -257,6 +257,8 @@
 
   /* PCS / NO. mismatch warning — only highlight the two cells */
   tbody tr.mismatch-warning td.warn-cell { background: #F5C518 !important; color: #1B3172 !important; font-weight: 700; }
+  tbody tr.dg-row td { background: #F8D0D0 !important; }
+  tbody tr.dg-row td.col-dg input { background: #F4B6B6 !important; font-weight: 700; }
 
   td {
     padding: 4px 4px;
@@ -760,6 +762,9 @@ function refreshEmptyClasses(tabId) {
     row.classList.toggle('empty-row', empty);
     // Highlight PCS cell on row 0 and any NO. cell when totals don't match
     row.classList.toggle('mismatch-warning', !empty && mismatch);
+    // Turn the whole row red when a DG class value has been entered
+    const dgVal = document.getElementById(`${tabId}_dg_${i}`)?.value?.trim();
+    row.classList.toggle('dg-row', !!dgVal);
   }
 }
 
