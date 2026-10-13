@@ -998,7 +998,7 @@ async function sharePdf(tabId) {
   const file = new File([buildPdf(sheet)], name, { type: 'application/pdf' });
   try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'PAC Check-In Sheet' });   // choose "Print" in the share sheet
+      await navigator.share({ files: [file] });   // choose "Print" in the share sheet
       return;
     }
   } catch (e) {
