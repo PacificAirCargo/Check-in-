@@ -800,43 +800,126 @@ function printTab(tabId) {
   // Normal browser: print the page directly
   if (!standalone) { window.print(); return; }
 
-  // Home Screen web app: window.print() is broken on iOS 27, so print the
-  // sheet from a hidden iframe instead.
-  const panel = document.getElementById('panel_' + tabId);
-  if (!panel) { window.print(); return; }
+  // Home Screen web app: window.print() is broken on iOS 27, so build a PDF
+  // and hand it to the share sheet (which has a Print option).
+  sharePdf(tabId);
+}
 
-  // Copy live input values / checkbox state into the markup
-  const clone = panel.cloneNode(true);
-  panel.querySelectorAll('input').forEach(src => {
-    const dst = clone.querySelector('#' + CSS.escape(src.id));
-    if (!dst) return;
-    if (src.type === 'checkbox') {
-      src.checked ? dst.setAttribute('checked', '') : dst.removeAttribute('checked');
-    } else {
-      dst.setAttribute('value', src.value);
-    }
+// ── Standalone fallback: dependency-free PDF → share sheet ─────────────────
+function collectSheet(tabId) {
+  const val = id => document.getElementById(id)?.value || '';
+  const rows = [];
+  const total = getRowCount(tabId);
+  for (let i = 0; i < total; i++) {
+    const r = {
+      pcs: val(`${tabId}_pcs_${i}`), weight: val(`${tabId}_weight_${i}`),
+      length: val(`${tabId}_length_${i}`), width: val(`${tabId}_width_${i}`),
+      height: val(`${tabId}_height_${i}`), no: val(`${tabId}_no_${i}`),
+      lithium: !!document.getElementById(`${tabId}_lith_${i}`)?.checked,
+      dg: val(`${tabId}_dg_${i}`)
+    };
+    if (!(r.pcs || r.weight || r.length || r.width || r.height || r.no || r.lithium || r.dg)) continue;
+    const m3 = calcM3(r);
+    rows.push([String(i + 1), r.pcs, r.weight, r.length, r.width, r.height, r.no,
+               m3 !== null ? m3.toFixed(2) : '', r.lithium ? 'YES' : '', r.dg]);
+  }
+  return {
+    id: val(`${tabId}_idnum`),
+    pcs: document.getElementById(`${tabId}_tot_pcs`)?.textContent || '0',
+    kg:  document.getElementById(`${tabId}_tot_kg`)?.textContent  || '0',
+    m3:  document.getElementById(`${tabId}_tot_m3`)?.textContent  || '0.00',
+    rows
+  };
+}
+
+function buildPdf(sheet) {
+  const W = 842, H = 595, M = 28;                       // A4 landscape, points
+  const esc = t => Array.from(String(t)).map(ch => {
+    if (ch === '\u00b3') return '\\263';                 // superscript 3 in WinAnsi
+    if (ch === '\\' || ch === '(' || ch === ')') return '\\' + ch;
+    return (ch >= ' ' && ch <= '~') ? ch : '?';
+  }).join('');
+  const text = (x, y, t, size, bold, rgb) =>
+    `BT ${rgb || '0 0 0'} rg /${bold ? 'F2' : 'F1'} ${size} Tf ${x.toFixed(1)} ${y.toFixed(1)} Td (${esc(t)}) Tj ET\n`;
+  const rect = (x, y, w, h, rgb) => `${rgb} rg ${x.toFixed(1)} ${y.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)} re f\n`;
+  const line = (x1, y1, x2, y2) => `0.7 0.77 0.85 RG 0.5 w ${x1.toFixed(1)} ${y1.toFixed(1)} m ${x2.toFixed(1)} ${y2.toFixed(1)} l S\n`;
+
+  const NAVY = '0.106 0.192 0.447', SKY = '0.161 0.671 0.886', WHITE = '1 1 1';
+  const heads = ['#', 'PCS', 'WEIGHT (kg)', 'L', 'W', 'H', 'NO.', 'M\u00b3', 'LITHIUM', 'DG CLASS'];
+  const widths = [40, 70, 90, 70, 70, 70, 70, 80, 90, 130];
+  const tableW = widths.reduce((a, b) => a + b, 0);
+  const rowH = 22, headH = 24;
+  const perPage = Math.floor((H - M - 110 - headH - M) / rowH);
+
+  const pages = [];
+  const chunks = [];
+  for (let i = 0; i < sheet.rows.length; i += perPage) chunks.push(sheet.rows.slice(i, i + perPage));
+  if (!chunks.length) chunks.push([]);
+
+  chunks.forEach((chunk, pi) => {
+    let c = '';
+    c += text(M, H - M - 14, 'PAC Check-In Sheet', 18, true, NAVY);
+    c += text(M, H - M - 36, 'ID Number: ' + (sheet.id || '-'), 12, true);
+    c += rect(W - M - 300, H - M - 44, 300, 40, NAVY);
+    c += text(W - M - 288, H - M - 30, `PCS ${sheet.pcs}    KG ${sheet.kg}    M\u00b3 ${sheet.m3}`, 13, true, WHITE);
+    if (chunks.length > 1) c += text(W - M - 60, M - 14 + 10, `Page ${pi + 1} of ${chunks.length}`, 9, false);
+
+    let y = H - M - 60 - headH;
+    c += rect(M, y, tableW, headH, SKY);
+    let x = M;
+    heads.forEach((h, k) => { c += text(x + 6, y + 8, h, 9, true, WHITE); x += widths[k]; });
+
+    chunk.forEach(r => {
+      y -= rowH; x = M;
+      r.forEach((cell, k) => { c += text(x + 6, y + 7, cell, 10, false); x += widths[k]; });
+      c += line(M, y, M + tableW, y);
+    });
+    pages.push(c);
   });
-  clone.classList.add('active');
 
-  const styles = Array.from(document.querySelectorAll('style')).map(s => s.outerHTML).join('\n');
-  const iframe = document.createElement('iframe');
-  iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
-  document.body.appendChild(iframe);
+  // Assemble PDF objects
+  const objs = [];
+  objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+  const kids = pages.map((_, i) => `${5 + i * 2} 0 R`).join(' ');
+  objs[2] = `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`;
+  objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+  objs[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>';
+  pages.forEach((c, i) => {
+    const pn = 5 + i * 2, cn = pn + 1;
+    objs[pn] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${cn} 0 R >>`;
+    objs[cn] = `<< /Length ${c.length} >>\nstream\n${c}endstream`;
+  });
 
-  const doc = iframe.contentDocument;
-  doc.open();
-  doc.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PAC Check-In Sheet</title>' +
-    styles + '</head><body><div class="content">' + clone.outerHTML + '</div></body></html>');
-  doc.close();
+  let pdf = '%PDF-1.4\n';
+  const offsets = [];
+  for (let i = 1; i < objs.length; i++) {
+    offsets[i] = pdf.length;
+    pdf += `${i} 0 obj\n${objs[i]}\nendobj\n`;
+  }
+  const xref = pdf.length;
+  pdf += `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let i = 1; i < objs.length; i++) pdf += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+  pdf += `trailer\n<< /Size ${objs.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
 
-  setTimeout(() => {
-    try {
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
-    } finally {
-      setTimeout(() => iframe.remove(), 60000);
+  const bytes = new Uint8Array(pdf.length);
+  for (let i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
+  return bytes;
+}
+
+async function sharePdf(tabId) {
+  const sheet = collectSheet(tabId);
+  const name = 'PAC-Check-In' + (sheet.id ? '-' + sheet.id.replace(/[^\w-]+/g, '_') : '') + '.pdf';
+  const file = new File([buildPdf(sheet)], name, { type: 'application/pdf' });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'PAC Check-In Sheet' });   // choose "Print" in the share sheet
+      return;
     }
-  }, 300);
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;   // user closed the sheet
+  }
+  // Fallback: open the PDF itself
+  window.open(URL.createObjectURL(file), '_blank');
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
