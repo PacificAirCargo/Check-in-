@@ -794,7 +794,49 @@ function closeTabConfirm(tabId) {
 }
 
 function printTab(tabId) {
-  window.print();
+  const standalone = window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+
+  // Normal browser: print the page directly
+  if (!standalone) { window.print(); return; }
+
+  // Home Screen web app: window.print() is broken on iOS 27, so print the
+  // sheet from a hidden iframe instead.
+  const panel = document.getElementById('panel_' + tabId);
+  if (!panel) { window.print(); return; }
+
+  // Copy live input values / checkbox state into the markup
+  const clone = panel.cloneNode(true);
+  panel.querySelectorAll('input').forEach(src => {
+    const dst = clone.querySelector('#' + CSS.escape(src.id));
+    if (!dst) return;
+    if (src.type === 'checkbox') {
+      src.checked ? dst.setAttribute('checked', '') : dst.removeAttribute('checked');
+    } else {
+      dst.setAttribute('value', src.value);
+    }
+  });
+  clone.classList.add('active');
+
+  const styles = Array.from(document.querySelectorAll('style')).map(s => s.outerHTML).join('\n');
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument;
+  doc.open();
+  doc.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>PAC Check-In Sheet</title>' +
+    styles + '</head><body><div class="content">' + clone.outerHTML + '</div></body></html>');
+  doc.close();
+
+  setTimeout(() => {
+    try {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } finally {
+      setTimeout(() => iframe.remove(), 60000);
+    }
+  }, 300);
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
